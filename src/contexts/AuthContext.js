@@ -1,15 +1,17 @@
-import React, { useContext, useState, useEffect } from "react";
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut 
+import React, { useContext, useState, useEffect, createContext } from "react";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
 } from "firebase/auth";
 import app from "../firebase";
 
 const auth = getAuth(app);
-const AuthContext = React.createContext();
+
+const AuthContext = createContext();
 
 export function useAuth() {
   return useContext(AuthContext);
@@ -19,20 +21,31 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+  function signup(email, password, displayName) {
+    return createUserWithEmailAndPassword(auth, email, password).then(
+      (userCredential) => {
+        return updateProfile(userCredential.user, { displayName });
+      }
+    );
   }
 
-  function signup(email, password) {
-    return createUserWithEmailAndPassword(auth, email, password);
+  function login(email, password) {
+    return signInWithEmailAndPassword(auth, email, password);
   }
 
   function logout() {
     return signOut(auth);
   }
 
+  function updateProfileInfo(displayName) {
+    if (!auth.currentUser) return Promise.reject("Usuário não logado");
+    return updateProfile(auth.currentUser, { displayName }).then(() => {
+      setCurrentUser({ ...auth.currentUser });
+    });
+  }
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
@@ -42,9 +55,10 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    login,
     signup,
+    login,
     logout,
+    updateProfileInfo,
   };
 
   return (
