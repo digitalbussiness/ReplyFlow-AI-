@@ -1,54 +1,58 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const emailRef = useRef();
+  const passwordRef = useRef();
   const { login } = useAuth();
-  const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
+
     try {
-      await login(email, password);
+      setError("");
+      setLoading(true);
+      await login(emailRef.current.value, passwordRef.current.value);
       navigate("/dashboard");
-    } catch (err) {
-      setError("Erro ao fazer login. Verifique suas credenciais.");
+    } catch {
+      setError("Falha ao fazer login");
     }
-  };
+
+    setLoading(false);
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        {error && <p className="text-red-500 mb-2">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block mb-1">Email</label>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4">Entrar</h2>
+        {error && <div className="text-red-500 mb-2">{error}</div>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label>Email</label>
             <input
               type="email"
-              className="w-full border p-2 rounded"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              ref={emailRef}
               required
+              className="w-full px-3 py-2 border rounded"
             />
           </div>
-          <div>
-            <label className="block mb-1">Senha</label>
+          <div className="mb-4">
+            <label>Senha</label>
             <input
               type="password"
-              className="w-full border p-2 rounded"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              ref={passwordRef}
               required
+              className="w-full px-3 py-2 border rounded"
             />
           </div>
           <button
+            disabled={loading}
             type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
           >
             Entrar
           </button>
