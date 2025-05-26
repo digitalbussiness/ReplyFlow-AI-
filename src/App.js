@@ -1,4 +1,11 @@
-import Landing from "./pages/Landing"; // Certifique-se de importar!
+// src/App.js
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Landing from "./pages/Landing";
 
 function App() {
   return (
@@ -18,3 +25,5 @@ function App() {
     </Routes>
   );
 }
+
+export default App;
